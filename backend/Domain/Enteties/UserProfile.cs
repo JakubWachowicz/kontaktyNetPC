@@ -7,10 +7,17 @@ namespace Domain.Enteties
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-
+        public required int Id { get; set; }
         [Required]
-        public int UserId { get; set; } //Foregin key to user
+        [MaxLength(50)]
+        public required string FirstName { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public required string LastName { get; set; }
+        [Required]
+        public DateTime DateOfBirth { get; set; }
+        [Required]
+        public required int UserId { get; set; } //Foregin key to user
 
         public int MyPersonalContactProfilesId { get; set; } // Foregin key to personal contact profiles
 

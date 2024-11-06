@@ -13,15 +13,7 @@ namespace Domain.Enteties
         public int UserProfileId { get; set; }
 
         [ForeignKey(nameof(UserProfileId))]
-        public virtual UserProfile UserProfile { get; set; }
-
-        [Required]
-        [MaxLength(50)]
-        public string FirstName { get; set; }      
-        [Required]
-        [MaxLength(50)]
-        public string LastName { get; set; }
-        public DateTime DateOfBirth { get; set; }
+        public virtual UserProfile? UserProfile { get; set; }
         public string PhoneNumber { get; set; }
         [Required]
         public string ContactEmail { get; set; } //email adress for contact profile can be different that email used for authentication
