@@ -10,11 +10,11 @@ namespace Domain.Enteties
 
         [Required]
         [EmailAddress]
-        public required string Email { get; set; } // email adress for authorization only
+        public string? Email { get; set; } // email adress for authorization only
 
         [Required]
         [DataType(DataType.Password)]
         [MinLength(8)]
-        public required string PasswordHash { get; set; } 
+        public string? PasswordHash { get; set; } 
     }
 }
