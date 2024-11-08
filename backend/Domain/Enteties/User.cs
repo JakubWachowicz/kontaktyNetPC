@@ -15,6 +15,9 @@ namespace Domain.Enteties
         [Required]
         [DataType(DataType.Password)]
         [MinLength(8)]
-        public string? PasswordHash { get; set; } 
+        public string? PasswordHash { get; set; }
+
+        // 1 to 1 relation ship to user profile
+        public virtual UserProfile? UserProfile { get; set; }
     }
 }
