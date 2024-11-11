@@ -18,5 +18,8 @@ namespace Domain.Enteties
         public string? ContactEmail { get; set; } //email adress for contact profile can be different that email used for authentication
         [MaxLength(500)]
         public string? ContactDescription { get; set; }
+
+        public int CategoryId { get; set; }
+        public virtual ContactCategory Category { get; set; }
     }
 }

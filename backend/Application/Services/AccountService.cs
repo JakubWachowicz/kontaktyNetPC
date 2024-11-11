@@ -1,67 +1,110 @@
-﻿using Domain.Enteties;
-using Domain.Models ;
+﻿using Domain.Models;
 using Persistence;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Application.Exceptions;
+using Domain;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Domain.Enteties;
+using Microsoft.EntityFrameworkCore;
+
 namespace Application.Services
 {
     public interface IAccountService
     {
-        string GenerateJwt(LoginUserDto loginUserDto);
-        void RegisterUser(RegisterUserDto registerUserDto);
+        Task<(Result, string)> GenerateJwt(LoginUserDto loginUserDto);
+        Task<Result> RegisterUser(RegisterUserDto registerUserDto);
     }
 
     public class AccountService : IAccountService
     {
-        private readonly DataContext context;
-        private readonly IPasswordHasher<User> passwordHasher;
-        private readonly AuthenticationSettings authenticationSettings;
+        private readonly DataContext _context;
+        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly AuthenticationSettings _authenticationSettings;
 
         public AccountService(DataContext context, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings)
         {
-            this.context = context;
-            this.passwordHasher = passwordHasher;
-            this.authenticationSettings = authenticationSettings;
-        }
-        public void RegisterUser(RegisterUserDto registerUserDto)
-        {
-            User user = new User() { Email = registerUserDto.Email, };
-            var hashedPassword = passwordHasher.HashPassword(user, registerUserDto.Password);
-            user.PasswordHash = hashedPassword;
-            context.Users.Add(user);
-            context.SaveChanges();
+            _context = context;
+            _passwordHasher = passwordHasher;
+            _authenticationSettings = authenticationSettings;
         }
 
-        //JWT Token gereration
-        public string GenerateJwt(LoginUserDto loginUserDto)
+        // Registers a new user in the system
+        public async Task<Result> RegisterUser(RegisterUserDto registerUserDto)
         {
-            var user = context.Users.FirstOrDefault(u => u.Email == loginUserDto.Email);
+            // Create the user entity
+            var user = new User
+            {
+                Email = registerUserDto.Email,
+            };
+            // Hash and set the password
+            user.PasswordHash = _passwordHasher.HashPassword(user, registerUserDto.Password);
+            // Save the user in the database
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            user = _context.Users.FirstOrDefault(u => u.Email == user.Email);
+            //Create new user profile
+            var userProfile = new UserProfile
+            {
+                UserId = user.Id,
+                FirstName = registerUserDto.FirstName,
+                LastName = registerUserDto.LastName,
+                DateOfBirth = registerUserDto.DateOfBirth
+            };
+            _context.UserProfiles.Add(userProfile);
+            await _context.SaveChangesAsync();
+            return Result.Success();
+        }
+
+        // Generates a JWT token for user authentication
+        public async Task<(Result, string)> GenerateJwt(LoginUserDto loginUserDto)
+        {
+            // Find the user by email
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginUserDto.Email);
             if (user == null)
             {
-                //throw new BadCredentialsException("Invalid email or password");
+                return (Result.Failure(new Error("404", "Invalid email or password")), string.Empty);
             }
-            var hashedPassword = passwordHasher.HashPassword(user, loginUserDto.Password);
-            var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, hashedPassword);
-            if (result == PasswordVerificationResult.Failed)
-            {
-                //throw new BadCredentialsException("Invalid email or password");
-            }
-            var claims = new List<Claim>() {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email), };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey));
-            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(authenticationSettings.JwtExpireDays);
-            var token = new JwtSecurityToken(authenticationSettings.JwtIssuer, authenticationSettings.JwtIssuer, claims, expires: expires, signingCredentials: cred);
+            // Verify the password
+            var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginUserDto.Password);
+            if (verificationResult == PasswordVerificationResult.Failed)
+            {
+                return (Result.Failure(new Error("404", "Invalid email or password")), string.Empty);
+            }
+
+            // Create JWT token claims
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+            };
+
+            // Generate security key and credentials
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            // Set token expiration date
+            var expires = DateTime.Now.AddDays(_authenticationSettings.JwtExpireDays);
+
+            // Create the JWT token
+            var token = new JwtSecurityToken(
+                _authenticationSettings.JwtIssuer,
+                _authenticationSettings.JwtIssuer,
+                claims,
+                expires: expires,
+                signingCredentials: credentials
+            );
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            return tokenHandler.WriteToken(token);
-        }
+            var jwtToken = tokenHandler.WriteToken(token);
 
+            return (Result.Success(), jwtToken);
+        }
     }
 }

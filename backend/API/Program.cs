@@ -1,4 +1,5 @@
 
+using API.Middlewares;
 using Application.Services;
 using Domain;
 using Domain.Enteties;
@@ -9,7 +10,6 @@ using Persistence;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 //Authenticanton configuration 
 AuthenticationSettings authenticationSettings = new AuthenticationSettings();
@@ -34,7 +34,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
 //Adding services
 
 builder.Services.AddControllers();
@@ -44,16 +43,30 @@ builder.Services.AddSwaggerGen();
 
 //AutoMapper added (Library for simplifying entities to DTO's proces)
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+
+
+
 //User password hashing service
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 //My services
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+
+builder.Services.AddScoped<ExceptionMiddleware>();
 
 //Database configuration
 builder.Services.AddDbContext<DataContext>(opt => {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddCors(opt => {
+    opt.AddPolicy("CorsPolicy", policy => {
+        policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000");
+        policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3001");
+    });
+});
+
 
 var app = builder.Build();
 
@@ -63,13 +76,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
+app.UseCors("CorsPolicy");
 app.UseAuthorization();
 
 app.MapControllers();
-
 
 
 //Auto databese update
@@ -77,13 +91,19 @@ using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 try
 {
-    var contex = services.GetRequiredService<DataContext>();
-    contex.Database.Migrate();
+    //update database
+    var context = services.GetRequiredService<DataContext>();
+    context.Database.Migrate();
+
+    //Seed db with mock data
+    DbSeederService seederService = new DbSeederService(context);
+    await seederService.SeedAsync();
 }
 catch(Exception ex)
 {
-    var logger = services.GetRequiredService<ILogger>();
-    logger.LogError(ex, "Error accured during migration!");
+    //Log any migration errors
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "An error occured during Migration");
 }
 
 app.Run();

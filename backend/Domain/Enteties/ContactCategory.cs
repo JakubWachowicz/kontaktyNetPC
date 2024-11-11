@@ -8,19 +8,12 @@ using System.Threading.Tasks;
 
 namespace Domain.Enteties
 {
-    public enum CategoryNames
-    {
-        Buisness, Private, Other
-    }
-    public class ProfileCategory
+    public class ContactCategory
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-
-        [Required]
-        public CategoryNames CategoryName { get; set; }
-
-        public virtual List<ProfileSubCategory> ProfileSubCategories { get; set; }
+        public int Id {  get; set; }
+        public CategoryName Name { get; set; }
+        public string? SubcategoryName { get; set; }
     }
 }

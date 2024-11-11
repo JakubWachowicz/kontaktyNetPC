@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -17,17 +17,27 @@ namespace API.Controllers
 
         //Register user with provided details
         [HttpPost("register")]
-        public ActionResult RegisterUser([FromBody] RegisterUserDto registerUserDto)
+        public async Task<ActionResult> RegisterUser([FromBody] RegisterUserDto registerUserDto)
         {
-            accountService.RegisterUser(registerUserDto);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);                
+            }
+            var result =await accountService.RegisterUser(registerUserDto);
+            if (!result.IsSuccess) {
+                return BadRequest(result.Error.Description);
+            }
             return Ok();
         }
         //Login user with provided credentials
         [HttpPost("login")]
-        public ActionResult LoginUser([FromBody] LoginUserDto loginUserDto)
+        public async Task<ActionResult> LoginUser([FromBody] LoginUserDto loginUserDto)
         {
 
-            string token = accountService.GenerateJwt(loginUserDto);
+            var (result,token) = await accountService.GenerateJwt(loginUserDto);
+            if (!result.IsSuccess) {
+                return BadRequest(result.Error.Description);
+            }
             return Ok(token);
         }
 
