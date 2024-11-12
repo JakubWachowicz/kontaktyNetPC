@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Domain.Models
 {
-    public class LoginUserDto
+    public class CategoryDto
     {
-        [EmailAddress,Required]
-        public required string Email { get; set; }
         [Required]
-        public required string Password { get; set; }
+        public string Name { get; set; }
+        public List<string> SubcategoryName { get; set; }
+
     }
 }

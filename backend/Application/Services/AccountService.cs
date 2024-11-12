@@ -19,7 +19,7 @@ namespace Application.Services
         Task<(Result, string)> GenerateJwt(LoginUserDto loginUserDto);
         Task<Result> RegisterUser(RegisterUserDto registerUserDto);
     }
-
+    //Service for auth specific operations
     public class AccountService : IAccountService
     {
         private readonly DataContext _context;
@@ -36,6 +36,10 @@ namespace Application.Services
         // Registers a new user in the system
         public async Task<Result> RegisterUser(RegisterUserDto registerUserDto)
         {
+            var userInDb =_context.Users.FirstOrDefault(u=>u.Email ==  registerUserDto.Email);
+            if (userInDb != null) {
+                return Result.Failure(new Error("400", "Provided email is already in db"));
+            }
             // Create the user entity
             var user = new User
             {
@@ -43,6 +47,7 @@ namespace Application.Services
             };
             // Hash and set the password
             user.PasswordHash = _passwordHasher.HashPassword(user, registerUserDto.Password);
+
             // Save the user in the database
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -51,7 +56,7 @@ namespace Application.Services
             //Create new user profile
             var userProfile = new UserProfile
             {
-                UserId = user.Id,
+                UserId = user!.Id,
                 FirstName = registerUserDto.FirstName,
                 LastName = registerUserDto.LastName,
                 DateOfBirth = registerUserDto.DateOfBirth
@@ -82,11 +87,11 @@ namespace Application.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Email, user.Email!),
             };
 
             // Generate security key and credentials
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey!));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             // Set token expiration date

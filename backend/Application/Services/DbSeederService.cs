@@ -1,13 +1,17 @@
 ﻿using Domain.Enteties;
+using Domain.Entities;
+using Domain.Models;
 using Persistence;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
 {
+    //Service for seeding mock data to db
     public class DbSeederService
     {
         private readonly DataContext _context;
@@ -21,38 +25,49 @@ namespace Application.Services
         {
             if (!_context.Users.Any())
             {
+                var users = SeedUsers();
+                await _context.Users.AddRangeAsync(users);
+                await _context.SaveChangesAsync();
+            }
+            if (!_context.Categories.Any()) {
                 var categories = SeedCategories();
-                var users = SeedUsers(categories);
-
-                await _context.AddRangeAsync(categories);
-                await _context.AddRangeAsync(users);
+                await _context.Categories.AddRangeAsync(categories);
                 await _context.SaveChangesAsync();
             }
         }
 
         private List<Category> SeedCategories()
         {
+           
             return new List<Category>
             {
                 new Category
                 {
-                    Name = CategoryName.Private,
-                    SubCategories = new List<string> { "Friend", "Family", "Acquaintance" }
+                    Name = "Private",
+                      SubCategories = new List<string>
+                        {
+                          "Friend",
+                          "Family",
+                          "Hobby"
+                       }
                 },
                 new Category
                 {
-                    Name = CategoryName.Buissnes,
-                    SubCategories = new List<string> { "Boss", "Client" }
+                    Name ="Business",
+                    SubCategories =new List<string>
+                        {
+                          "boss","client"
+                       }
                 },
-                new Category
+                 new Category
                 {
-                    Name = CategoryName.Other,
-                    SubCategories = new List<string> {}
-                }
+                    Name ="Other",
+                },
             };
         }
-
-        private List<User> SeedUsers(List<Category> categories)
+        //Create sample users
+        //TODO: Seed profile categories and contacts
+        private List<User> SeedUsers()
         {
             var users = new List<User>
             {
@@ -60,7 +75,7 @@ namespace Application.Services
                 {
                     Email = "johndoe@example.com",
                     PasswordHash = "hashedPassword1",
-                   
+
                 },
                 new User
                 {

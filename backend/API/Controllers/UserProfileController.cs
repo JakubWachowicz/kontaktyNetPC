@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class UserProfileController : ControllerBase
     {
@@ -31,8 +31,15 @@ namespace API.Controllers
 
             return Ok(userProfile);
         }
+        [HttpGet("your-contacts"),Authorize]
+        public ActionResult<IEnumerable<ContactDto>> GetYourContacts()
+        {
+            var currentLoggedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var contacts = _userProfileService.GetYourContacts(int.Parse(currentLoggedUserId));
+            return Ok(contacts);
+        }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}"),Authorize]
         public ActionResult<UserProfileDto> Get(int id)
         {
 

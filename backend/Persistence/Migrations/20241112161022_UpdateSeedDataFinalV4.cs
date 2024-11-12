@@ -6,22 +6,37 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class UpdateSeedDataFinalV4 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ProfileCategory",
+                name: "Categories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CategoryName = table.Column<int>(type: "INTEGER", nullable: false)
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    SubCategories = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProfileCategory", x => x.Id);
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ContactCategories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    SubcategoryName = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContactCategories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -39,26 +54,6 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProfileSubCategory",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    SubcategoryName = table.Column<string>(type: "TEXT", nullable: false),
-                    ProfileCategoryId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProfileSubCategory", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProfileSubCategory_ProfileCategory_ProfileCategoryId",
-                        column: x => x.ProfileCategoryId,
-                        principalTable: "ProfileCategory",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserProfiles",
                 columns: table => new
                 {
@@ -67,16 +62,15 @@ namespace Persistence.Migrations
                     FirstName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     LastName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ProfileCategoryId = table.Column<int>(type: "INTEGER", nullable: false)
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserProfiles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserProfiles_ProfileCategory_ProfileCategoryId",
-                        column: x => x.ProfileCategoryId,
-                        principalTable: "ProfileCategory",
+                        name: "FK_UserProfiles_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -90,11 +84,18 @@ namespace Persistence.Migrations
                     UserProfileId = table.Column<int>(type: "INTEGER", nullable: false),
                     PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
                     ContactEmail = table.Column<string>(type: "TEXT", nullable: false),
-                    ContactDescription = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true)
+                    ContactDescription = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    CategoryId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Contacts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Contacts_ContactCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "ContactCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Contacts_UserProfiles_UserProfileId",
                         column: x => x.UserProfileId,
@@ -104,38 +105,39 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Contacts_CategoryId",
+                table: "Contacts",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Contacts_UserProfileId",
                 table: "Contacts",
                 column: "UserProfileId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProfileSubCategory_ProfileCategoryId",
-                table: "ProfileSubCategory",
-                column: "ProfileCategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserProfiles_ProfileCategoryId",
+                name: "IX_UserProfiles_UserId",
                 table: "UserProfiles",
-                column: "ProfileCategoryId");
+                column: "UserId",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Categories");
+
+            migrationBuilder.DropTable(
                 name: "Contacts");
 
             migrationBuilder.DropTable(
-                name: "ProfileSubCategory");
-
-            migrationBuilder.DropTable(
-                name: "Users");
+                name: "ContactCategories");
 
             migrationBuilder.DropTable(
                 name: "UserProfiles");
 
             migrationBuilder.DropTable(
-                name: "ProfileCategory");
+                name: "Users");
         }
     }
 }

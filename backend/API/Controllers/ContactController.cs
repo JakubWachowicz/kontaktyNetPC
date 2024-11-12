@@ -1,4 +1,5 @@
 ﻿using Application.Services;
+using Domain;
 using Domain.Enteties;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -26,6 +27,17 @@ namespace API.Controllers
             return Ok(contacts);
         }
 
+
+        //Get user with specified id 
+        //TODO: Change name to Get
+        [HttpGet("{id}")]
+        public ActionResult<ContactDto> GetAll(int id)
+        {
+            var contactDto = _contactService.GetContactById(id);
+            return Ok(contactDto);
+        }
+
+
         //Create new contact authenictaion required
         [Authorize]
         [HttpPost]
@@ -39,17 +51,19 @@ namespace API.Controllers
 
         [Authorize]
         [HttpPut("{id}")]
-        public ActionResult UpdateContact(int id,[FromBody] ContactDto contactDto)
+        public ActionResult UpdateContact([FromRoute]int id,[FromBody] CreateContactDto contactDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             _contactService.UpdateContact(id,contactDto);
             return Ok();
         }
         [Authorize]
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public ActionResult DeleteContact(int id) {
 
-            
+            var currentLoggedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            Result result = _contactService.DeleteContact(int.Parse(currentLoggedUserId),id);
             return Ok();
         }
     }

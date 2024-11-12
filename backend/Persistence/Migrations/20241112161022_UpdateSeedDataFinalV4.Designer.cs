@@ -11,34 +11,14 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241111173352_UserEntityUpdate3")]
-    partial class UserEntityUpdate3
+    [Migration("20241112161022_UpdateSeedDataFinalV4")]
+    partial class UpdateSeedDataFinalV4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
-
-            modelBuilder.Entity("Domain.Enteties.Category", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SubCategories")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories");
-                });
 
             modelBuilder.Entity("Domain.Enteties.Contact", b =>
                 {
@@ -72,38 +52,22 @@ namespace Persistence.Migrations
                     b.ToTable("Contacts");
                 });
 
-            modelBuilder.Entity("Domain.Enteties.ProfileCategory", b =>
+            modelBuilder.Entity("Domain.Enteties.ContactCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CategoryName")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProfileCategory");
-                });
-
-            modelBuilder.Entity("Domain.Enteties.ProfileSubCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ProfileCategoryId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SubcategoryName")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProfileCategoryId");
-
-                    b.ToTable("ProfileSubCategory");
+                    b.ToTable("ContactCategories");
                 });
 
             modelBuilder.Entity("Domain.Enteties.User", b =>
@@ -119,9 +83,6 @@ namespace Persistence.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("UserProfileId")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -147,15 +108,10 @@ namespace Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ProfileCategoryId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProfileCategoryId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -163,9 +119,28 @@ namespace Persistence.Migrations
                     b.ToTable("UserProfiles");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SubCategories")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
             modelBuilder.Entity("Domain.Enteties.Contact", b =>
                 {
-                    b.HasOne("Domain.Enteties.Category", "Category")
+                    b.HasOne("Domain.Enteties.ContactCategory", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -182,39 +157,15 @@ namespace Persistence.Migrations
                     b.Navigation("UserProfile");
                 });
 
-            modelBuilder.Entity("Domain.Enteties.ProfileSubCategory", b =>
-                {
-                    b.HasOne("Domain.Enteties.ProfileCategory", "ProfileCategory")
-                        .WithMany("ProfileSubCategories")
-                        .HasForeignKey("ProfileCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProfileCategory");
-                });
-
             modelBuilder.Entity("Domain.Enteties.UserProfile", b =>
                 {
-                    b.HasOne("Domain.Enteties.ProfileCategory", "ProfileCategory")
-                        .WithMany()
-                        .HasForeignKey("ProfileCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domain.Enteties.User", "User")
                         .WithOne("UserProfile")
                         .HasForeignKey("Domain.Enteties.UserProfile", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProfileCategory");
-
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Enteties.ProfileCategory", b =>
-                {
-                    b.Navigation("ProfileSubCategories");
                 });
 
             modelBuilder.Entity("Domain.Enteties.User", b =>

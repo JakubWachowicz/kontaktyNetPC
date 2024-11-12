@@ -2,27 +2,20 @@
 using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
 using Domain.Enteties;
 using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services
 {
     public interface IContactService
     {
         void CreateContact(int id, CreateContactDto contactDto);
-        Result DeleteContact(int id);
+        Result DeleteContact(int currentLoggedUserId, int id);
         IEnumerable<ContactDto> GetAllContacts();
-        Result UpdateContact(int id, ContactDto contactDto);
+        ContactDto GetContactById(int id);
+        Result UpdateContact(int id, CreateContactDto contactDto);
     }
 
 
@@ -42,51 +35,67 @@ namespace Application.Services
         //Get all contacts
         public IEnumerable<ContactDto> GetAllContacts()
         {
-            var contacts = _context.Contacts;
-
+            var contacts = _context.Contacts.Include(c => c.UserProfile).Include(c=>c.Category);
             return _mapper.Map<List<ContactDto>>(contacts);
         }
+        public ContactDto GetContactById(int id) {
+            var contacts = _context.Contacts.Include(c => c.UserProfile).Include(c => c.Category).FirstOrDefault(c => c.Id == id);
+            if(contacts !=null)
+            {
+                return _mapper.Map<ContactDto>(contacts);
+            }
+            return new ContactDto{ };
+        }
+
         //Creating new contact
         public void CreateContact(int id,CreateContactDto contactDto)
         {
-            if (id != null)
-            {
                 UserProfile? userProfile = _context.UserProfiles.FirstOrDefault(up => up.UserId == id);
-                if (userProfile == null)
-                {
-                    //TODO: w przypadku null przypisz nw profil użytkownika
-                }
                 var newContact = _mapper.Map<Contact>(contactDto);
                 newContact.UserProfileId = userProfile!.Id;
                 if (newContact != null)
                 {
                     _context.Contacts.Add(newContact);
+                    _context.SaveChanges();
                 }
-            }
         }
-
-        public Result UpdateContact(int id, ContactDto contactDto)
+        //Update contact
+        public Result UpdateContact(int id, CreateContactDto contactDto)
         {
             var contact = _context.Contacts.Find(id);
             if (contact == null)
             {
                 return Result.Failure(new Error("404", "User not found"));
             }
-            _mapper.Map<Contact>(contact);
+
+            //Map contact
+            contact.PhoneNumber = contactDto.PhoneNumber;
+            contact.ContactDescription = contact.ContactDescription;
+            contact.Category = new ContactCategory();
+            contact.Category.Name = contactDto.Category.Name;
+            contact.Category.SubcategoryName = contactDto.Category.SubcategoryName;
+            contact.ContactEmail = contactDto.ContactEmail;
             _context.SaveChanges();
             return Result.Success();
-
         }
 
-        public Result DeleteContact(int id)
+        public Result DeleteContact(int currentLoggedUserId,int id)
         {
-            var contactToRemove = _context.Contacts.Find(id);
+            var contactToRemove = _context.Contacts
+             .Include(c => c.UserProfile) 
+             .FirstOrDefault(c => c.Id == id);
             if (contactToRemove == null)
             {
                 return Result.Failure(new Error("404", "Contact not found"));
             }
-            _context.Contacts.Remove(contactToRemove);
-            _context.SaveChanges();
+            if (contactToRemove.UserProfile.UserId == currentLoggedUserId) {
+                _context.Contacts.Remove(contactToRemove);
+                _context.SaveChanges();
+            }
+            else
+            {
+                return Result.Failure(new Error("400", "You can only delete contacts created by yourself"));
+            }
             return Result.Success();
         }
     }
