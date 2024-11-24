@@ -16,7 +16,7 @@ namespace Domain.Enteties
         [DataType(DataType.Password)]
         [MinLength(8)]
         public string PasswordHash { get; set; }
-        
+
         public virtual UserProfile? UserProfile { get; set; }
     }
 }

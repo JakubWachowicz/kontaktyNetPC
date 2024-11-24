@@ -58,12 +58,15 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ExceptionMiddleware>();
 
 //Database configuration
-builder.Services.AddDbContext<DataContext>(opt => {
+builder.Services.AddDbContext<DataContext>(opt =>
+{
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddCors(opt => {
-    opt.AddPolicy("CorsPolicy", policy => {
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("CorsPolicy", policy =>
+    {
         policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000");
         policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3001");
     });
@@ -101,7 +104,7 @@ try
     DbSeederService seederService = new DbSeederService(context);
     await seederService.SeedAsync();
 }
-catch(Exception ex)
+catch (Exception ex)
 {
     //Log any migration errors
     var logger = services.GetRequiredService<ILogger<Program>>();

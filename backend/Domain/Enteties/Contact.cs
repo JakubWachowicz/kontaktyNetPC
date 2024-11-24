@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Enteties
 {
@@ -14,7 +14,7 @@ namespace Domain.Enteties
         public int UserProfileId { get; set; }
         public required virtual UserProfile UserProfile { get; set; }
         public string? PhoneNumber { get; set; }
-        [Required,EmailAddress]
+        [Required, EmailAddress]
         public string? ContactEmail { get; set; } //email adress for contact profile can be different that email used for authentication
         [MaxLength(500)]
         public string? ContactDescription { get; set; }

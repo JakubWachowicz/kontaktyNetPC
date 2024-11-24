@@ -1,11 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Models;
 using Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -30,18 +25,21 @@ namespace Application.Services
             var categories = _context.Categories;
             List<CategoryDto> categoryDtos = new List<CategoryDto>();
 
-            foreach (var category in categories) { 
+            foreach (var category in categories)
+            {
                 CategoryDto categoryDto = new CategoryDto();
                 categoryDto.SubcategoryName = new List<string>();
-                if (category.Name != null) { 
-                   categoryDto.Name = category.Name;
+                if (category.Name != null)
+                {
+                    categoryDto.Name = category.Name;
 
                 }
-                if (category.SubCategories != null) { 
-                   categoryDto.SubcategoryName.AddRange(category.SubCategories);
+                if (category.SubCategories != null)
+                {
+                    categoryDto.SubcategoryName.AddRange(category.SubCategories);
 
                 }
-                categoryDtos.Add(categoryDto);  
+                categoryDtos.Add(categoryDto);
             }
             return categoryDtos;
         }

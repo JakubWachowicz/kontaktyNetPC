@@ -1,16 +1,13 @@
-﻿using Domain.Models;
-using Persistence;
+﻿using Domain;
+using Domain.Enteties;
+using Domain.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Persistence;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Application.Exceptions;
-using Domain;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Domain.Enteties;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services
 {
@@ -36,8 +33,9 @@ namespace Application.Services
         // Registers a new user in the system
         public async Task<Result> RegisterUser(RegisterUserDto registerUserDto)
         {
-            var userInDb =_context.Users.FirstOrDefault(u=>u.Email ==  registerUserDto.Email);
-            if (userInDb != null) {
+            var userInDb = _context.Users.FirstOrDefault(u => u.Email == registerUserDto.Email);
+            if (userInDb != null)
+            {
                 return Result.Failure(new Error("400", "Provided email is already in db"));
             }
             // Create the user entity

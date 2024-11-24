@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Enteties
 {
@@ -19,7 +19,7 @@ namespace Domain.Enteties
         [Required]
         public int UserId { get; set; } //Foregin key to user
         [ForeignKey(nameof(UserId))]
-        public virtual User User {get;set;}
-        public virtual List<Contact> Contacts { get; set; } 
+        public virtual User User { get; set; }
+        public virtual List<Contact> Contacts { get; set; }
     }
 }

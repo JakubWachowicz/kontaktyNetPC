@@ -2,14 +2,13 @@
 using Domain;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace API.Controllers
 {
     [Route("[controller]")]
-    [ApiController]
+    [ApiController, Authorize]
     public class UserProfileController : ControllerBase
     {
         private IUserProfileService _userProfileService;
@@ -19,7 +18,7 @@ namespace API.Controllers
             _userProfileService = userProfileService;
         }
 
-        [HttpGet, Authorize]
+        [HttpGet]
         public ActionResult<UserProfileDto> Get()
         {
             var currentLoggedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -31,7 +30,7 @@ namespace API.Controllers
 
             return Ok(userProfile);
         }
-        [HttpGet("your-contacts"),Authorize]
+        [HttpGet("your-contacts")]
         public ActionResult<IEnumerable<ContactDto>> GetYourContacts()
         {
             var currentLoggedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -39,7 +38,7 @@ namespace API.Controllers
             return Ok(contacts);
         }
 
-        [HttpGet("{id}"),Authorize]
+        [HttpGet("{id}")]
         public ActionResult<UserProfileDto> Get(int id)
         {
 
@@ -52,11 +51,11 @@ namespace API.Controllers
             return Ok(userProfile);
         }
 
-        [HttpPut, Authorize]
+        [HttpPut]
         public ActionResult Update([FromBody] UpdateUserProfileDto userProfileDto)
         {
             var currentLoggedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            Result result = _userProfileService.UpdateUserProfile(int.Parse(currentLoggedUserId),userProfileDto);
+            Result result = _userProfileService.UpdateUserProfile(int.Parse(currentLoggedUserId), userProfileDto);
             if (result.IsFailure)
             {
                 BadRequest(result.Error.Description);
@@ -64,7 +63,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [HttpPut("{id}"), Authorize]
+        [HttpPut("{id}")]
         public ActionResult AddProfileToContactBook([FromBody] int id)
         {
             Result result = _userProfileService.AddContactToProfileBook(id);

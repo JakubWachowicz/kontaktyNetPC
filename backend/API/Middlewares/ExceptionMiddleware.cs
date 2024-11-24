@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Application.Exceptions;
-using System.Threading.Tasks;
+﻿using Application.Exceptions;
 
 namespace API.Middlewares
 {
@@ -9,7 +7,7 @@ namespace API.Middlewares
         Task InvokeAsync(HttpContext context, RequestDelegate next);
     }
 
-    public class ExceptionMiddleware :IMiddleware, IExceptionMiddleware
+    public class ExceptionMiddleware : IMiddleware, IExceptionMiddleware
     {
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
@@ -38,7 +36,7 @@ namespace API.Middlewares
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync("{\"error\": \"Something went wrong\"}" + ex);
-               
+
             }
         }
     }

@@ -1,13 +1,6 @@
 ﻿using Domain.Enteties;
 using Domain.Entities;
-using Domain.Models;
 using Persistence;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -29,7 +22,8 @@ namespace Application.Services
                 await _context.Users.AddRangeAsync(users);
                 await _context.SaveChangesAsync();
             }
-            if (!_context.Categories.Any()) {
+            if (!_context.Categories.Any())
+            {
                 var categories = SeedCategories();
                 await _context.Categories.AddRangeAsync(categories);
                 await _context.SaveChangesAsync();
@@ -38,7 +32,7 @@ namespace Application.Services
 
         private List<Category> SeedCategories()
         {
-           
+
             return new List<Category>
             {
                 new Category

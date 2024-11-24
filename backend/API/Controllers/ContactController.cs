@@ -1,6 +1,5 @@
 ﻿using Application.Services;
 using Domain;
-using Domain.Enteties;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +10,7 @@ namespace API.Controllers
     [ApiController]
     [Route("[controller]")]
     public class ContactController : ControllerBase
-    {   
+    {
         //Injected service for contct related operations
         private readonly IContactService _contactService;
 
@@ -21,7 +20,7 @@ namespace API.Controllers
         }
         //Get all users, authenticetion not required
         [HttpGet]
-        public ActionResult<ContactDto> GetAll()
+        public ActionResult<ContactDto> GetAll([FromQuery] ContactQuery query)
         {
             IEnumerable<ContactDto> contacts = _contactService.GetAllContacts();
             return Ok(contacts);
@@ -29,7 +28,7 @@ namespace API.Controllers
 
 
         //Get user with specified id 
-        //TODO: Change name to Get
+        //authorization not required
         [HttpGet("{id}")]
         public ActionResult<ContactDto> GetAll(int id)
         {
@@ -45,25 +44,26 @@ namespace API.Controllers
         {
             var currentLoggedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _contactService.CreateContact(int.Parse(currentLoggedUserId),contactDto);
+            _contactService.CreateContact(int.Parse(currentLoggedUserId), contactDto);
             return Ok();
         }
 
         [Authorize]
         [HttpPut("{id}")]
-        public ActionResult UpdateContact([FromRoute]int id,[FromBody] CreateContactDto contactDto)
+        public ActionResult UpdateContact([FromRoute] int id, [FromBody] CreateContactDto contactDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _contactService.UpdateContact(id,contactDto);
+            _contactService.UpdateContact(id, contactDto);
             return Ok();
         }
         [Authorize]
         [HttpDelete("{id}")]
-        public ActionResult DeleteContact(int id) {
+        public ActionResult DeleteContact(int id)
+        {
 
             var currentLoggedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            Result result = _contactService.DeleteContact(int.Parse(currentLoggedUserId),id);
+            Result result = _contactService.DeleteContact(int.Parse(currentLoggedUserId), id);
             return Ok();
         }
     }

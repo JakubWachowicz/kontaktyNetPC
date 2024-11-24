@@ -48,7 +48,7 @@ namespace Application.Services
         //Get contacts created by you
         public IEnumerable<ContactDto> GetYourContacts(int id)
         {
-            var contacts = _context.Contacts.Include(c=>c.Category).Include(c => c.UserProfile).Where(u => u.UserProfile.UserId == id);
+            var contacts = _context.Contacts.Include(c => c.Category).Include(c => c.UserProfile).Where(u => u.UserProfile.UserId == id);
             return _mapper.Map<List<ContactDto>>(contacts);
         }
         //Update your contact
@@ -68,7 +68,7 @@ namespace Application.Services
             _context.SaveChanges();
             return Result.Success();
         }
-        
+
         public Result AddContactToProfileBook(int id)
         {
             //Check claims and search for User Id
@@ -77,12 +77,12 @@ namespace Application.Services
             {
                 return Result.Failure(new Error("403", "Unauthorize"));
             }
-            if ( currentLoggedUserId.Value == id.ToString())
+            if (currentLoggedUserId.Value == id.ToString())
             {
                 return Result.Failure(new Error("400", "You can't add yourself to contact book"));
             }
             //Contact user to add
-            Contact? contact = _context.Contacts.FirstOrDefault(c=>c.Id == id);
+            Contact? contact = _context.Contacts.FirstOrDefault(c => c.Id == id);
             if (contact == null)
             {
                 return Result.Failure(new Error("404", "User not found"));

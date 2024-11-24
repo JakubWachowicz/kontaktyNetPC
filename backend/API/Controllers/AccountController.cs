@@ -21,10 +21,11 @@ namespace API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);                
+                return BadRequest(ModelState);
             }
-            var result =await accountService.RegisterUser(registerUserDto);
-            if (!result.IsSuccess) {
+            var result = await accountService.RegisterUser(registerUserDto);
+            if (!result.IsSuccess)
+            {
                 return BadRequest(result.Error.Description);
             }
             return Ok();
@@ -34,8 +35,9 @@ namespace API.Controllers
         public async Task<ActionResult> LoginUser([FromBody] LoginUserDto loginUserDto)
         {
 
-            var (result,token) = await accountService.GenerateJwt(loginUserDto);
-            if (!result.IsSuccess) {
+            var (result, token) = await accountService.GenerateJwt(loginUserDto);
+            if (!result.IsSuccess)
+            {
                 return BadRequest(result.Error.Description);
             }
             return Ok(token);

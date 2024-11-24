@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    //Controller for contact categories
     [Route("[controller]")]
-    [ApiController,Authorize]
-    public class CategoryController:ControllerBase
+    [ApiController, Authorize]
+    public class CategoryController : ControllerBase
     {
         private ICategoryService _categoryService;
 
@@ -15,11 +16,12 @@ namespace API.Controllers
         {
             _categoryService = categoryService;
         }
+        //Get all categories with their subcategories
 
         [HttpGet]
         public ActionResult<CategoryDto> Get()
         {
-            var categoriesDto =_categoryService.GetCategories();
+            var categoriesDto = _categoryService.GetCategories();
             return Ok(categoriesDto);
         }
     }

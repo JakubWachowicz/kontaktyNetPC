@@ -1,11 +1,11 @@
 ﻿
-using Domain.Models;
-using Microsoft.AspNetCore.Http;
-using Persistence;
-using Domain.Enteties;
 using AutoMapper;
 using Domain;
+using Domain.Enteties;
+using Domain.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Persistence;
 
 namespace Application.Services
 {
@@ -35,29 +35,30 @@ namespace Application.Services
         //Get all contacts
         public IEnumerable<ContactDto> GetAllContacts()
         {
-            var contacts = _context.Contacts.Include(c => c.UserProfile).Include(c=>c.Category);
+            var contacts = _context.Contacts.Include(c => c.UserProfile).Include(c => c.Category);
             return _mapper.Map<List<ContactDto>>(contacts);
         }
-        public ContactDto GetContactById(int id) {
+        public ContactDto GetContactById(int id)
+        {
             var contacts = _context.Contacts.Include(c => c.UserProfile).Include(c => c.Category).FirstOrDefault(c => c.Id == id);
-            if(contacts !=null)
+            if (contacts != null)
             {
                 return _mapper.Map<ContactDto>(contacts);
             }
-            return new ContactDto{ };
+            return new ContactDto { };
         }
 
         //Creating new contact
-        public void CreateContact(int id,CreateContactDto contactDto)
+        public void CreateContact(int id, CreateContactDto contactDto)
         {
-                UserProfile? userProfile = _context.UserProfiles.FirstOrDefault(up => up.UserId == id);
-                var newContact = _mapper.Map<Contact>(contactDto);
-                newContact.UserProfileId = userProfile!.Id;
-                if (newContact != null)
-                {
-                    _context.Contacts.Add(newContact);
-                    _context.SaveChanges();
-                }
+            UserProfile? userProfile = _context.UserProfiles.FirstOrDefault(up => up.UserId == id);
+            var newContact = _mapper.Map<Contact>(contactDto);
+            newContact.UserProfileId = userProfile!.Id;
+            if (newContact != null)
+            {
+                _context.Contacts.Add(newContact);
+                _context.SaveChanges();
+            }
         }
         //Update contact
         public Result UpdateContact(int id, CreateContactDto contactDto)
@@ -79,16 +80,17 @@ namespace Application.Services
             return Result.Success();
         }
 
-        public Result DeleteContact(int currentLoggedUserId,int id)
+        public Result DeleteContact(int currentLoggedUserId, int id)
         {
             var contactToRemove = _context.Contacts
-             .Include(c => c.UserProfile) 
+             .Include(c => c.UserProfile)
              .FirstOrDefault(c => c.Id == id);
             if (contactToRemove == null)
             {
                 return Result.Failure(new Error("404", "Contact not found"));
             }
-            if (contactToRemove.UserProfile.UserId == currentLoggedUserId) {
+            if (contactToRemove.UserProfile.UserId == currentLoggedUserId)
+            {
                 _context.Contacts.Remove(contactToRemove);
                 _context.SaveChanges();
             }

@@ -5,7 +5,7 @@ using Domain.Models;
 namespace Domain
 {
     // Configurations for AutoMapper, allowing DTOs to be mapped to domain entities.
-    public class MappingProfiles:Profile
+    public class MappingProfiles : Profile
     {
         public MappingProfiles()
         {
@@ -24,7 +24,7 @@ namespace Domain
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.UserProfile.FirstName))
                 .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.UserProfile.LastName))
                 .ForMember(dest => dest.ContactEmail, opt => opt.MapFrom(src => src.ContactEmail))
-                .ForMember(dest=>dest.DateOfBirth, opt=>opt.MapFrom(src=>src.UserProfile.DateOfBirth))
+                .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.UserProfile.DateOfBirth))
                  .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
                 .ForMember(dest => dest.ContactDescription, opt => opt.MapFrom(src => src.ContactDescription));
