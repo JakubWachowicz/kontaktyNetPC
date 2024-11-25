@@ -11,9 +11,10 @@ export const EditContactPage: React.FC = () => {
     ContactEmail: '',
     phoneNumber: '',
     contactDescription: '',
-    category: { name: "", subcategoryName: '' }, // Initialize category as an object
+    category: { name: "", subCategory: '' }, // Initialize category as an object
   });
   const [categories, setCategories] = useState<CategoryWithListDto[]>([]); // Store categories
+  const [subCategories, setSubcategories] = useState<string[]>([]); // Store categories
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export const EditContactPage: React.FC = () => {
           ContactEmail: contact.contactEmail || "",
           phoneNumber: contact.phoneNumber || "",
           contactDescription: contact.contactDescription || "",
-          category: { name: contact.categoryName || "", subcategoryName: contact.subCategory || "" },
+          category: { name: contact.categoryName || "", subCategory: contact.subCategory || "" },
         };
         setNewContact(createContactDto);
       } catch (err) {
@@ -39,16 +40,19 @@ export const EditContactPage: React.FC = () => {
 
     const fetchCategories = async () => {
       try {
-        let categoryList = await agent.Category.list();
+        const categoryList = await agent.Category.list();
         setCategories(categoryList); // Populate categories
+        //ToDo: set subcategories   
+        
+       // const selectedCategory:CategoryWithListDto = categoryList.find((category) => category.name === newContact.category.name);
+       // setSubcategories(selectedCategory!.subcategoryName);
       } catch (err) {
-        setError('Error fetching categories');
+        setError('Error fetching categories');  
         console.error(err);
       }
     };
-
-    fetchCategories();
     fetchContact();
+    fetchCategories();
   }, [id]);
 
   // Handle changes for text fields and select dropdown
@@ -64,13 +68,14 @@ export const EditContactPage: React.FC = () => {
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const selectedCategoryName = e.target.value;
     const selectedCategory = categories.find((category) => category.name === selectedCategoryName);
-
+    //TODO dodać listę subkategorii
+    setSubcategories(selectedCategory!.subcategoryName);
     if (selectedCategory) {
       setNewContact((prev) => ({
         ...prev,
         category: {
           name: selectedCategory.name,
-          subcategoryName: selectedCategory?.SubcategoryName![0] || "", // Default to first subcategory
+          subCategory:selectedCategory.subcategoryName[0],
         },
       }));
     }
@@ -83,7 +88,7 @@ export const EditContactPage: React.FC = () => {
       ...prev,
       category: {
         ...prev.category,
-        subcategoryName: selectedSubcategory,
+        subCategory: selectedSubcategory,
       }
     }));
   };
@@ -162,6 +167,26 @@ export const EditContactPage: React.FC = () => {
             ))}
           </Select>
         </FormControl>
+
+
+
+        {newContact.category.name != "Other"? <FormControl fullWidth margin="normal" required>
+          <InputLabel>Category</InputLabel>
+          <Select
+            name="subcategory"
+            value={newContact.category.subCategory}
+            onChange={handleSubcategoryChange} // Handle category selection
+            label="SubCategory"
+          >
+            {subCategories.map((category) => (
+              <MenuItem key={category} value={category}>
+                {category} {/* Display category name in the dropdown */}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>:null }
+
+
 
        
         <Box sx={{ marginTop: 2 }}>

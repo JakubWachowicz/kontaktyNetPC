@@ -6,7 +6,7 @@ import CategoryWithListDto from '../models/CategoryWithListsDto';
 
 export interface CategoryDto {
   name: string;
-  subcategoryName: string;
+  subCategory: string;
 }
 
 export interface CreateContactDto {
@@ -21,7 +21,7 @@ const AddContactPage: React.FC = () => {
     ContactEmail: '',
     phoneNumber: '',
     contactDescription: '',
-    category: { name: '', subcategoryName: '' }, // Initialize category as an object
+    category: { name: '', subCategory: '' }, // Initialize category as an object
   });
   const [categories, setCategories] = useState<CategoryWithListDto[]>([]); // Store categories
   const [loading, setLoading] = useState<boolean>(false);
@@ -68,12 +68,12 @@ const AddContactPage: React.FC = () => {
         ...prev,
         category: {
           name: selectedCategory.name,
-          subcategoryName: '', // Clear subcategory when category changes
+          subCategory: '', // Clear subcategory when category changes
         },
       }));
 
       // Set the subcategories for the selected category
-      setSubcategories(selectedCategory.SubcategoryName || []); // If there are no subcategories, set an empty array
+      setSubcategories(selectedCategory.subcategoryName || []); // If there are no subcategories, set an empty array
     }
   };
 
@@ -83,7 +83,7 @@ const AddContactPage: React.FC = () => {
       ...prev,
       category: {
         ...prev.category,
-        subcategoryName: e.target.value, // Update subcategory
+        subCategory: e.target.value, // Update subcategory
       }
     }));
   };
@@ -163,12 +163,12 @@ const AddContactPage: React.FC = () => {
           </Select>
         </FormControl>
 
-        {/* Subcategory Select (only show if the selected category has subcategories) */}
+        {/*TODO:Porpawić działanie */}
         {subcategories.length > 0 && (
           <FormControl fullWidth margin="normal">
             <InputLabel>Subcategory</InputLabel>
             <Select
-              value={newContact.category.subcategoryName}
+              value={newContact.category.subCategory}
               onChange={handleSubcategoryChange}
               label="Subcategory"
             >
